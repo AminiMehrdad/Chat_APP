@@ -1,14 +1,16 @@
-import { Link } from "react-router";
+// import { Link } from "react-router";
+import Side from "../../components/side"
+import Conversation from "../../components/conversation"
+import "./style.css"
 
 function Chat() {
-  return (
-    <div>
-      <h1>Chat Page</h1>
-      <p>This is the main chat page.</p>
-
-      {/* example link to user chat */}
-      <Link to="/userchat">Go to User Chat</Link>
-    </div>
+  return (  
+     <div className="container app">
+      <div className="row app-one">
+        <Side />
+        <Conversation />
+      </div>
+    </div>  
   );
 }
 
