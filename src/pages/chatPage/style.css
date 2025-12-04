@@ -1,4 +1,4 @@
-.root,
+#root,
 div,
 span {
   height: 100%;
@@ -8,9 +8,11 @@ span {
   margin: 0;
   box-sizing: border-box;
 }
-
-.root {
-  background: url("../../../public/images/ChatBackground/bgy.png") no-repeat fixed center;
+.fa-2x {
+  font-size: 1.5em;
+}
+#root {
+  background: url("/public/images/ChatBackground/bgy.png") no-repeat fixed center;
   background-size: cover;
 }
 
