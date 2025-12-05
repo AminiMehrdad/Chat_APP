@@ -3,6 +3,7 @@ header{
 	padding:30px 40px 30px 20px;
 	display: flex;
 	flex-direction: row-reverse;
+	align-items: center;
 }
 header > *{
 	display:inline-block;
