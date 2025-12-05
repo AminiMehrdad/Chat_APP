@@ -1,0 +1,35 @@
+header{
+	height:110px;
+	padding:30px 40px 30px 20px;
+	display: flex;
+	flex-direction: row-reverse;
+}
+header > *{
+	display:inline-block;
+	vertical-align:top;
+	height: 15%;
+}
+
+
+
+#chat{
+	padding-left:0;
+	margin:0;
+	list-style-type:none;
+	overflow-y:scroll;
+	height:75%;
+	border-top:2px solid #fff;
+	border-bottom:2px solid #fff;
+}
+
+main footer{
+	height:10%;
+	padding:20px 30px 10px 20px;
+}
+
+
+.blue{
+	background-color:#6fbced;
+	margin-right:0;
+	margin-left:7px;
+}

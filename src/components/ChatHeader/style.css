@@ -1,0 +1,25 @@
+main header img{
+	border-radius:50%;
+	height: 100%;
+}
+
+main header div{
+	margin-right:10px;
+	margin-left:145px;
+	display: flex;
+	flex-direction: column;
+	align-items: end;
+}
+
+main header div h2{
+	font-size:18px;
+	margin-top: 5px;
+	margin-bottom:5px;
+}
+
+main header div h3{
+	font-size:14px;
+	font-weight:normal;
+	color:#7e818a;
+}
+
