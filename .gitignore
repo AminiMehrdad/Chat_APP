@@ -2,6 +2,9 @@
 /dist
 /node_modules
 /build
+/data
+/init
+/pgadmin
 
 # Logs
 logs
