@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CreateUserDto {
+export class CreateUsersDto {
     @ApiProperty({ example: 'Ali' })
     username: string;
 
@@ -13,7 +13,7 @@ export class CreateUserDto {
     gender: string;
 }
 
-export class UpdateUserDto {
+export class UpdateUsersDto {
     @ApiProperty({ example: 'Ali' , required:false})
     username?: string;
 
