@@ -1,6 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { ValidationPipe } from '@nestjs/common';
+import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -12,8 +16,28 @@ async function bootstrap() {
     .addTag('users')
     .build();
 
+  // swagger confgis:
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api-docs', app, document);
+  // ------------------------------------------------------
+
+  // create pip line for filter and interceptor for responses:
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
+
+  app.useGlobalInterceptors(new TransformInterceptor());
+  app.useGlobalFilters(new AllExceptionsFilter());
+
+  // ------------------------------------------------------
+
+  // request and response loggger:
+  app.useGlobalInterceptors(new LoggingInterceptor());
+  // ------------------------------------------------------
 
   await app.listen(process.env.PORT ?? 3000);
   console.log(`server is run on port ${process.env.PORT}`);

@@ -1,7 +1,15 @@
-import { Injectable } from '@nestjs/common';
+// users.service.ts
+import {
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Users } from './users.entity';
+import { Users } from './Entitys/users.entity';
+import { CreateUsersDto } from 'src/common/dto/create-users.dto';
+import { UpdateUsersDto } from 'src/common/dto/update-users.dto';
 
 @Injectable()
 export class UsersService {
@@ -10,24 +18,81 @@ export class UsersService {
     private readonly usersRepo: Repository<Users>,
   ) {}
 
-  create(data: Partial<Users>) {
-    const user = this.usersRepo.create(data);
-    return this.usersRepo.save(user);
+  async create(dto: CreateUsersDto) {
+    const user = this.usersRepo.create(dto);
+
+    try {
+      return await this.usersRepo.save(user);
+    } catch (error: any) {
+      const code = error?.code || error?.driverError?.code;
+
+      if (code === '23505' || code === 'ER_DUP_ENTRY') {
+        const detail: string = error.detail || error.sqlMessage || '';
+
+        if (detail.includes('phonenumber')) {
+          throw new ConflictException('Phone number already exists');
+        }
+        if (detail.includes('username')) {
+          throw new ConflictException('Username already exists');
+        }
+
+        throw new ConflictException('User already exists');
+      }
+
+      throw new InternalServerErrorException('Could not create user');
+    }
   }
 
   findAll() {
     return this.usersRepo.find();
   }
 
-  findOne(id: number) {
-    return this.usersRepo.findOne({ where: { id } });
+  async findOne(id: number) {
+    const user = await this.usersRepo.findOne({ where: { id } });
+
+    if (!user) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
+
+    return user;
   }
 
-  update(id: number, data: Partial<Users>) {
-    return this.usersRepo.update(id, data);
+  async update(id: number, dto: UpdateUsersDto) {
+    try {
+      const result = await this.usersRepo.update(id, dto);
+
+      if (result.affected === 0) {
+        throw new NotFoundException(`User with id ${id} not found`);
+      }
+    } catch (error: any) {
+      const code = error?.code || error?.driverError?.code;
+
+      if (code === '23505' || code === 'ER_DUP_ENTRY') {
+        const detail: string = error.detail || error.sqlMessage || '';
+
+        if (detail.includes('phonenumber')) {
+          throw new ConflictException('Phone number already exists');
+        }
+        if (detail.includes('username')) {
+          throw new ConflictException('Username already exists');
+        }
+
+        throw new ConflictException('User already exists');
+      }
+
+      throw new InternalServerErrorException('Could not update user');
+    }
+
+    return this.findOne(id);
   }
 
-  remove(id: number) {
-    return this.usersRepo.delete(id);
+  async remove(id: number) {
+    const result = await this.usersRepo.delete(id);
+
+    if (result.affected === 0) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
+
+    return { deleted: true };
   }
 }

@@ -1,9 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsOptional, IsString, Matches } from 'class-validator';
-import { GenderEnum } from './users.entity';
+import { GenderEnum } from '../../modules/users/Entitys/users.entity';
 
 export class UpdateUsersDto {
-
   @ApiProperty({ example: 'Ali', required: false })
   @IsOptional()
   @IsString()
@@ -12,7 +11,7 @@ export class UpdateUsersDto {
   @ApiProperty({ example: '09054274429', required: false })
   @IsOptional()
   @Matches(/^09[0-9]{9}$/, {
-    message: 'Phone number must be a valid Iranian number (09xxxxxxxxx)'
+    message: 'Phone number must be a valid Iranian number (09xxxxxxxxx)',
   })
   phonenumber?: string;
 
