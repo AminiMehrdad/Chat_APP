@@ -10,16 +10,25 @@ import { Repository } from 'typeorm';
 import { Users } from './Entitys/users.entity';
 import { CreateUsersDto } from 'src/common/dto/create-users.dto';
 import { UpdateUsersDto } from 'src/common/dto/update-users.dto';
+import { PasswordService } from '../auth/password.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(Users)
     private readonly usersRepo: Repository<Users>,
+    private readonly passwordService: PasswordService,
   ) {}
 
   async create(dto: CreateUsersDto) {
-    const user = this.usersRepo.create(dto);
+    const hashedPassword = await this.passwordService.hashPassword(
+      dto.password,
+    );
+
+    const user = this.usersRepo.create({
+      ...dto,
+      password: hashedPassword,
+    });
 
     try {
       return await this.usersRepo.save(user);
@@ -57,9 +66,39 @@ export class UsersService {
     return user;
   }
 
+  async findByUsername(username: string) {
+    const user = await this.usersRepo.findOne({ where: { username } });
+
+    if (!user) {
+      throw new NotFoundException(`User with username ${username} not found`);
+    }
+
+    return user;
+  }
+
+  async findByPhonenumber(phonenumber: string) {
+    const user = await this.usersRepo.findOne({ where: { phonenumber } });
+
+    if (!user) {
+      throw new NotFoundException(
+        `User with phonenumber ${phonenumber} not found`,
+      );
+    }
+
+    return user;
+  }
+
   async update(id: number, dto: UpdateUsersDto) {
+    const updateData: Partial<Users> = { ...dto };
+
+    if (dto.password) {
+      updateData.password = await this.passwordService.hashPassword(
+        dto.password,
+      );
+    }
+
     try {
-      const result = await this.usersRepo.update(id, dto);
+      const result = await this.usersRepo.update(id, updateData);
 
       if (result.affected === 0) {
         throw new NotFoundException(`User with id ${id} not found`);
@@ -94,5 +133,22 @@ export class UsersService {
     }
 
     return { deleted: true };
+  }
+
+  async updateRefreshToken(
+    userId: number,
+    hashedRefreshToken: string,
+  ): Promise<void> {
+    const user = await this.findOne(userId);
+
+    if (!user) {
+      throw new NotFoundException(`User with id ${userId} not found`);
+    }
+
+    // Update the user's hashed refresh token
+    user.hashedRefreshToken = hashedRefreshToken;
+
+    // Save the updated user entity back to the database
+    await this.usersRepo.save(user);
   }
 }
