@@ -6,29 +6,21 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Auth, Repository } from 'typeorm';
 import { Users } from './Entitys/users.entity';
 import { CreateUsersDto } from 'src/common/dto/create-users.dto';
 import { UpdateUsersDto } from 'src/common/dto/update-users.dto';
-import { PasswordService } from '../auth/password.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(Users)
     private readonly usersRepo: Repository<Users>,
-    private readonly passwordService: PasswordService,
   ) {}
 
   async create(dto: CreateUsersDto) {
-    const hashedPassword = await this.passwordService.hashPassword(
-      dto.password,
-    );
-
-    const user = this.usersRepo.create({
-      ...dto,
-      password: hashedPassword,
-    });
+    
+    const user = this.usersRepo.create(dto);
 
     try {
       return await this.usersRepo.save(user);
@@ -90,12 +82,6 @@ export class UsersService {
 
   async update(id: number, dto: UpdateUsersDto) {
     const updateData: Partial<Users> = { ...dto };
-
-    if (dto.password) {
-      updateData.password = await this.passwordService.hashPassword(
-        dto.password,
-      );
-    }
 
     try {
       const result = await this.usersRepo.update(id, updateData);
