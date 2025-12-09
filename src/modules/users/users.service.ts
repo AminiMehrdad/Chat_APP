@@ -51,9 +51,9 @@ export class UsersService {
   async findOne(id: number) {
     const user = await this.usersRepo.findOne({ where: { id } });
 
-    if (!user) {
-      throw new NotFoundException(`User with id ${id} not found`);
-    }
+    // if (!user) {
+    //   throw new NotFoundException(`User with id ${id} not found`);
+    // }
 
     return user;
   }
@@ -61,9 +61,9 @@ export class UsersService {
   async findByUsername(username: string) {
     const user = await this.usersRepo.findOne({ where: { username } });
 
-    if (!user) {
-      throw new NotFoundException(`User with username ${username} not found`);
-    }
+    // if (!user) {
+    //   throw new NotFoundException(`User with username ${username} not found`);
+    // }
 
     return user;
   }
@@ -71,11 +71,11 @@ export class UsersService {
   async findByPhonenumber(phonenumber: string) {
     const user = await this.usersRepo.findOne({ where: { phonenumber } });
 
-    if (!user) {
-      throw new NotFoundException(
-        `User with phonenumber ${phonenumber} not found`,
-      );
-    }
+    // if (!user) {
+    //   throw new NotFoundException(
+    //     `User with phonenumber ${phonenumber} not found`,
+    //   );
+    // }
 
     return user;
   }

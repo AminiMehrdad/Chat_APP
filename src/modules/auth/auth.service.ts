@@ -31,15 +31,20 @@ export class AuthService {
       dto.phonenumber,
     );
 
-    if (existing || userPhonenumber) {
+    if (existing) {
       throw new UnauthorizedException(
         'User whith this username already exists',
       );
     }
 
+    if (userPhonenumber) {
+      throw new UnauthorizedException(
+        'User whith this phonenumber already exists',
+      );
+    }
+
     const passwordHash = await this.hash(dto.password);
-    const userImage =
-      dto.gender == 'female' ? '/images/female.png' : '/images/male.png';
+    const userImage = dto.gender == 'female' ? '/images/female.png' : '/images/male.png';
 
     const user = await this.usersService.create({
       ...dto,
@@ -69,6 +74,7 @@ export class AuthService {
     }
 
     const ok = await this.verifyHash(user.password, dto.password);
+    
     if (!ok) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -79,6 +85,7 @@ export class AuthService {
       user.image,
       user.phonenumber,
     );
+    
 
     await this.usersService.updateRefreshToken(
       user.id,
@@ -125,17 +132,18 @@ export class AuthService {
       image,
       phonenumber,
     };
+    
 
     const accessToken = await this.jwtService.signAsync(payload, {
       secret: process.env.JWT_ACCESS_SECRET,
       expiresIn: '30m',
     });
+    
 
     const refreshToken = await this.jwtService.signAsync(payload, {
-      secret: process.env.JWT_REFRESH_SECRET,
+      secret: process.env.JWT_ACCESS_SECRET,
       expiresIn: '120d',
     });
-
     return { accessToken, refreshToken };
   }
 }
