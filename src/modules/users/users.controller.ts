@@ -12,8 +12,9 @@ import { UsersService } from './users.service';
 import { ApiTags, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { CreateUsersDto } from '../../common/dto/create-users.dto';
 
-import { Users } from './Entitys/users.entity';
+import { Role, Users } from './Entitys/users.entity';
 import { UpdateUsersDto } from '../../common/dto/update-users.dto';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 @ApiTags('users')
 @Controller('users')
@@ -21,6 +22,7 @@ export class UserController {
   constructor(private readonly userService: UsersService) {}
 
   @Post()
+  @Roles(Role.Admin)
   @ApiBody({ type: CreateUsersDto })
   @ApiResponse({
     status: 201,
@@ -32,17 +34,20 @@ export class UserController {
   }
 
   @Get()
+  @Roles(Role.Admin)
   @ApiResponse({ status: 200, description: 'List of all users', type: [Users] })
   findAll() {
     return this.userService.findAll();
   }
   @Get(':id')
+  @Roles(Role.Admin)
   @ApiResponse({ status: 200, description: 'Single user', type: Users })
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.userService.findOne(id);
   }
 
   @Put(':id')
+  @Roles(Role.Admin)
   @ApiBody({ type: UpdateUsersDto })
   @ApiResponse({ status: 200, description: 'User updated', type: Users })
   update(@Param('id', ParseIntPipe) id: number, @Body() body: UpdateUsersDto) {
@@ -50,6 +55,7 @@ export class UserController {
   }
 
   @Delete(':id')
+  @Roles(Role.Admin)
   @ApiResponse({ status: 200, description: 'User deleted' })
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.userService.remove(id);

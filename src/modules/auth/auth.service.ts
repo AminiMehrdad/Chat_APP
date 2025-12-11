@@ -1,18 +1,23 @@
-import { forwardRef, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, forwardRef, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
-import { Users } from '../users/Entitys/users.entity';
+import { Role, Users } from '../users/Entitys/users.entity';
 import { CreateUsersDto } from 'src/common/dto/create-users.dto';
+import { AcessRole } from '../users/Entitys/role.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
-  ) {}
+    @InjectRepository(AcessRole)
+    private roleRepo: Repository<AcessRole>,
+  ) { }
 
-  private async hash(data: string) {
+  async hash(data: string) {
     return argon2.hash(data, {
       type: argon2.argon2id,
       memoryCost: 2 ** 16, // 64MB
@@ -43,13 +48,21 @@ export class AuthService {
       );
     }
 
+
     const passwordHash = await this.hash(dto.password);
     const userImage = dto.gender == 'female' ? '/images/female.png' : '/images/male.png';
+    const role = await this.roleRepo.findOne({
+      where: { name: "user" }
+    });
+    if (!role) {
+      throw new BadRequestException('Role not found');
+    }
 
     const user = await this.usersService.create({
       ...dto,
       password: passwordHash,
       image: userImage,
+      role: role
     });
 
     const tokens = await this.issueTokens(
@@ -57,6 +70,7 @@ export class AuthService {
       user.username,
       user.image,
       user.phonenumber,
+      user.role,
     );
 
     await this.usersService.updateRefreshToken(
@@ -74,7 +88,7 @@ export class AuthService {
     }
 
     const ok = await this.verifyHash(user.password, dto.password);
-    
+
     if (!ok) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -84,8 +98,9 @@ export class AuthService {
       user.username,
       user.image,
       user.phonenumber,
+      user.role,
     );
-    
+
 
     await this.usersService.updateRefreshToken(
       user.id,
@@ -111,6 +126,7 @@ export class AuthService {
       user.username,
       user.image,
       user.phonenumber,
+      user.role,
     );
     await this.usersService.updateRefreshToken(
       user.id,
@@ -121,24 +137,22 @@ export class AuthService {
   }
 
   private async issueTokens(
-    userId: number,
-    username: string,
-    image: string,
-    phonenumber: string,
+userId: number, username: string, image: string, phonenumber: string, role: AcessRole,
   ) {
     const payload = {
       sub: userId,
       username,
       image,
       phonenumber,
+      role
     };
-    
+
 
     const accessToken = await this.jwtService.signAsync(payload, {
       secret: process.env.JWT_ACCESS_SECRET,
       expiresIn: '30m',
     });
-    
+
 
     const refreshToken = await this.jwtService.signAsync(payload, {
       secret: process.env.JWT_ACCESS_SECRET,

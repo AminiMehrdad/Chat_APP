@@ -6,15 +6,18 @@ import {
   IsString,
   Matches,
 } from 'class-validator';
-import { GenderEnum } from '../../modules/users/Entitys/users.entity';
+import { GenderEnum, Role } from '../../modules/users/Entitys/users.entity';
+import { AcessRole } from 'src/modules/users/Entitys/role.entity';
 
 export class CreateUsersDto {
   @ApiProperty({ example: 'Ali' })
-  @IsString()
   @IsNotEmpty()
+  @IsString()
   username: string;
 
   @ApiProperty({ example: '09054274429' })
+  @IsString()
+  @IsNotEmpty()
   @Matches(/^09[0-9]{9}$/, {
     message: 'Phone number must be a valid Iranian number (09xxxxxxxxx)',
   })
@@ -32,4 +35,8 @@ export class CreateUsersDto {
   @IsOptional()
   @IsString()
   image: string;
+
+  @IsOptional()
+  role: AcessRole
+
 }

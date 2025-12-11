@@ -5,6 +5,7 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { ValidationPipe } from '@nestjs/common';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -38,6 +39,8 @@ async function bootstrap() {
   // request and response loggger:
   app.useGlobalInterceptors(new LoggingInterceptor());
   // ------------------------------------------------------
+
+  app.use(cookieParser());
 
   await app.listen(process.env.PORT ?? 3000);
   console.log(`server is run on port ${process.env.PORT}`);
