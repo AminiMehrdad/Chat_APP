@@ -10,6 +10,11 @@ import cookieParser from 'cookie-parser';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.enableCors({
+    origin: 'http://localhost:3000', // یا پورتی که React شما اجرا می‌شود
+    credentials: true,
+  });
+
   const config = new DocumentBuilder()
     .setTitle('User Service API')
     .setDescription('API documentation for User CRUD service')
