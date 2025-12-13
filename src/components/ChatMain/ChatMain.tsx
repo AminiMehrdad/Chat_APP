@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import ChatHeadr from "../ChatHeader";
+import ChatHeadr from "../ChatHeader/ChatHeadr";
 import "./style.css";
-import Massages from "../Massages";
-import ChatFooter from "../ChatFooter";
+import Massages from "../Massages/Massages";
+import ChatFooter from "../ChatFooter/ChatFooter";
 
 const ChatMain = () => {
     const [messages, setMessages] = useState([]);

@@ -19,7 +19,7 @@ const ChatFooter = () => {
                     className="fa fa-paperclip sender" style={{fontSize:"24px",color:"gray"}}
                     // onClick={() => console.log("Attach file")}
                 ></i>
-                <i class="fa fa-paper-plane sender" style={{fontSize:"24px"}}></i>
+                <i className="fa fa-paper-plane sender" style={{fontSize:"24px"}}></i>
 
                 </div>
 

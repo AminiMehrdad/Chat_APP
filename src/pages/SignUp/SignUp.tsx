@@ -1,46 +1,39 @@
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import "../../styles/Login.css"
-import { useState } from "react";
-import { AuthService } from "../../services/authService";
+import { FormEvent, useState } from "react";
+
+import { client } from "../../api/client";
+import { useAuth } from "../../context/AuthProvider";
 
 const SignUp = () => {
-    const [formData, setFormData] = useState({
+    const { login } = useAuth();
+    const navigate = useNavigate();
+    const [form, setForm] = useState({
         phonenumber: "",
         password: "",
         username: "",
         gender: "",
     });
+    const [error, setError] = useState < string | null > (null);
 
-    const [loding, setLoading] = useState(false);
-
-    const handeleChange = (e) => {
-        setFormData({
-            ...formData,
+    const handeleChange = (e: { target: { name: any; value: any; }; }) => {
+        setForm({
+            ...form,
             [e.target.name]: e.target.value
         })
     }
 
-    const handleSignup = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-
-        try {
-            const res = await AuthService.signup(formData);
-
-            // Backend باید accessToken بدهد
-            const { accessToken } = res.data;
-            localStorage.setItem('access_token', accessToken);
-
-            alert("Signup successful. User auto logged in.");
-            console.log("Signup response:", res.data);
-
-        } catch (err) {
-            console.error(err);
-            alert(err.response?.data?.message || "Signup failed");
-        }
-
-        setLoading(false);
-    };
+    async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    setError(null);
+    try {
+      const { data } = await client.post('/signup', form);
+      login(data.accessToken, data.role);
+      navigate('/chat', { replace: true });
+    } catch (err: any) {
+      setError(err.response?.data?.message ?? 'Signup failed');
+    }
+  };
 
     return (
         <div className="login-container">
@@ -84,7 +77,7 @@ const SignUp = () => {
                 <select
                     id="gender"
                     name="gender"
-                    value={formData.gender}
+                    value={form.gender}
                     onChange={handeleChange}
                     required
                 >
@@ -97,9 +90,9 @@ const SignUp = () => {
 
 
 
-            <button type="submit" onClick={handleSignup} disabled={loding} className="Login-Button">
-                {loding ? 'Loading...' : 'SIGN UP'}
-                </button>
+            <button type="submit" onClick={handleSubmit}  className="Login-Button">
+               SIGN UP
+            </button>
 
             <div className="divider">OR</div>
 

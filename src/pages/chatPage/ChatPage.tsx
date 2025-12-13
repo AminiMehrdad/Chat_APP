@@ -1,5 +1,5 @@
-import ChatMain from "../../components/ChatMain";
-import Side from "../../components/side";
+import ChatMain from "../../components/ChatMain/ChatMain";
+import Side from "../../components/side/Side";
 import "./style.css"
 
 const ChatPage = () => {
