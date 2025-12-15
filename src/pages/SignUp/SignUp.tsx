@@ -27,7 +27,7 @@ const SignUp = () => {
     e.preventDefault();
     setError(null);
     try {
-      const { data } = await client.post('/signup', form);
+      const { data } = await client.post('/auth/signup', form);
       login(data.accessToken, data.role);
       navigate('/chat', { replace: true });
     } catch (err: any) {

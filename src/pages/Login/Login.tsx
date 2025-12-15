@@ -23,7 +23,7 @@ const Login = () => {
         setError(null);
 
         try {
-            const { data } = await client.post('/login', form);
+            const { data } = await client.post('/auth/login', form);
             login(data.accessToken, data.role);
             navigate((location.state as any)?.from?.pathname || '/chat', { replace: true });
         } catch (err: any) {
