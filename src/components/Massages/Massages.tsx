@@ -1,10 +1,15 @@
+import { useUser } from '../../context/UserProvider';
 import './style.css';
 
 interface ChatMessage {
-  username: string;
-  clock: string;
-  date: string;
-  massage: string; // اگر در سرور واقعاً همین فیلد است؛ در غیر این صورت به message تغییر دهید
+  text:string;
+  sender: string;
+  user: {
+    username: string;
+    clock: string;
+    date: string;
+    massage: string; // اگر در سرور واقعاً همین فیلد است؛ در غیر این صورت به message تغییر دهید
+  }
 }
 
 interface MassagesProps {
@@ -12,17 +17,18 @@ interface MassagesProps {
 }
 
 const Massages: React.FC<MassagesProps> = ({ messages }) => {
-  const isYou = messages.username === 'Mehrdad';
+  const {user} = useUser()
+  const isYou = messages.sender === user.username;
 
   return (
     <li className={isYou ? 'me' : 'you'}>
       <div className="entete">
         <span className={`status ${isYou ? 'blue' : 'green'}`} />
-        <h2>{messages.username}</h2>
-        <h3>{`${messages.clock}, ${messages.date}`}</h3>
+        <h2>{messages.user.username}</h2>
+        <h3>{`${messages.user.clock}, ${messages.user.date}`}</h3>
       </div>
       <div className="triangle" />
-      <div className="message">{messages.massage}</div>
+      <div className="message">{messages.text}</div>
     </li>
   );
 };

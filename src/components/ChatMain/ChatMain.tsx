@@ -1,51 +1,75 @@
-import {  useLayoutEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import ChatHeadr from "../ChatHeader/ChatHeadr";
 import "./style.css";
 import Massages from "../Massages/Massages";
 import ChatFooter from "../ChatFooter/ChatFooter";
 import { client } from "../../api/client";
+import { socket } from "../../api/socket";
+import { useUser } from "../../context/UserProvider";
+
+interface Message {
+    sender: string;
+    resiver: string;
+    date: number;
+    text: string;
+    user: {
+        username: string;
+        clock: string;
+        date: string;
+        massage: string;
+    }
+}
+ 
+
 
 const ChatMain = () => {
-    const [messages, setMessages] = useState([]);
-    const [user, setUser] = useState({
-        id:"",
-        image:"",
-        username:"",
-        phonenumber:""
-    })
-
-    useLayoutEffect(() => {
-        const fetchUserInfo = async () => {
-            try {
-                const {data} = await client.get("/users/Info");
-                setUser(data.data)
-            } catch (error) {
-                console.error("Failed to load user Info", error)
-            }
-        };
-        fetchUserInfo()
-        fetch("/mock-data/massage.data.json")
-            .then(res => res.json())
-            .then(data => {
-                setMessages(data);
-            })
-            .catch(err => console.error("Error loading json:", err));
-    }, []);
+    const {user, users, resiver, setResiver} = useUser()
+    console.log(resiver);
     
+    const [messages, setMessages] = useState<Message[]>([]);
+    const [text, setText] = useState('');
+
+
+
+    useEffect(() => {
+        socket.on("newMessage", (massage) => {
+            setMessages((prev) => [...prev, massage]);
+        });
+        return () => {
+            socket.off("newMessage");
+        }
+    }, []);
+
+    const sendMessage = () => {
+        socket.emit('sendMessage', { 
+            sender: user.username,
+            resiver: resiver.username,
+            date:  Date.now(),
+            text,
+            user: {
+                username: user.username,
+                clock: new Date().toLocaleTimeString(),
+                date: new Date().toLocaleDateString(),
+                massage: text
+            }
+             });
+        setText('');
+    };
+
     return (
         <main>
             <header>
-                <ChatHeadr image={user.image} username={user.username} phonenumber={user.phonenumber} />
+                <ChatHeadr/>
             </header>
 
             <ul id="chat">
-                {messages.map((msg, index) => 
+                {messages.map((msg, index) =>
                     <Massages messages={msg} key={index} />
                 )}
             </ul>
 
             <footer>
-                <ChatFooter />
+                <ChatFooter text={text} setText={setText} onSend={sendMessage}/>
             </footer>
         </main>
     );

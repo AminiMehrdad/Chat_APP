@@ -1,18 +1,15 @@
+import { useUser } from "../../context/UserProvider";
 import "./style.css"
-interface HeaderUserProps {
-    image:string,
-    username:string,
-    phonenumber:string
-}
 
-const ChatHeadr: React.FC<HeaderUserProps> = ({image, username, phonenumber}) => {
-    
+
+const ChatHeadr: React.FC = () => {
+    const {user} = useUser()
     return (
         <>
-        <img src={image} alt="userImage" />
+        <img src={user.image} alt="userImage" />
                 <div className="headrtext">
-                    <h2>{username}</h2>
-                    <h3>{phonenumber}</h3>
+                    <h2>{user.username}</h2>
+                    <h3>{user.phonenumber}</h3>
                 </div>
 
                 <button className="logout">Log out</button>
