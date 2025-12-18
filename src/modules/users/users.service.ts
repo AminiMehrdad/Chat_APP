@@ -1,19 +1,22 @@
 // users.service.ts
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Auth, Repository } from 'typeorm';
+import { Auth, Not, Repository } from 'typeorm';
 import { Users } from './Entitys/users.entity';
 import { CreateUsersDto } from 'src/common/dto/create-users.dto';
 import { UpdateUsersDto } from 'src/common/dto/update-users.dto';
+import { UserId } from 'src/common/commonServices/userIdfinder.service';
 
 @Injectable()
 export class UsersService {
   constructor(
+    private readonly userId: UserId,
     @InjectRepository(Users)
     private readonly usersRepo: Repository<Users>,
   ) {}
@@ -44,26 +47,47 @@ export class UsersService {
     }
   }
 
+  async foundUsers(id:number) {
+     return this.usersRepo.find({
+      where: {
+        id: Not(id)
+      },
+      select: {
+        id: true,
+        username: true,
+        image: true
+      },
+    });
+  }
+
+  
   findAll() {
     return this.usersRepo.find();
   }
 
   async findOne(id: number) {
-    const user = await this.usersRepo.findOne({ where: { id } });
 
-    // if (!user) {
-    //   throw new NotFoundException(`User with id ${id} not found`);
-    // }
+    if (typeof id !== 'number') {
+    throw new BadRequestException('Invalid userId');
+  }
+    const user = await this.usersRepo.findOneBy({ id });
+    
+      
+    if (!user) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
 
     return user;
   }
 
   async findByUsername(username: string) {
+    
     const user = await this.usersRepo.findOne({ where: { username } });
+    
 
-    // if (!user) {
-    //   throw new NotFoundException(`User with username ${username} not found`);
-    // }
+    if (!user) {
+      throw new NotFoundException(`User with username ${username} not found`);
+    }
 
     return user;
   }

@@ -7,12 +7,14 @@ import { CreateUsersDto } from 'src/common/dto/create-users.dto';
 import { AcessRole } from '../users/Entitys/role.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { UserId } from 'src/common/commonServices/userIdfinder.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
+    private readonly userId: UserId,
     @InjectRepository(AcessRole)
     private roleRepo: Repository<AcessRole>,
   ) { }
@@ -78,7 +80,7 @@ export class AuthService {
       await this.hash(tokens.refreshToken),
     );
 
-    return tokens;
+    return {...tokens, role: user.role};
   }
 
   async login(dto: { phonenumber: string; password: string }) {
@@ -107,11 +109,19 @@ export class AuthService {
       await this.hash(tokens.refreshToken),
     );
 
-    return tokens;
+    return {...tokens, role: user.role};
   }
 
-  async refresh(userId: number, refreshToken: string) {
-    const user = await this.usersService.findOne(userId);
+  async refresh(refreshToken: string) {   
+    if (!refreshToken) {      
+      throw new UnauthorizedException('Access denied');
+    }
+
+
+    const id = await this.userId.findUserId(refreshToken);
+
+    const user = await this.usersService.findOne(id);
+
     if (!user || !user.hashedRefreshToken) {
       throw new UnauthorizedException('Access denied');
     }
@@ -133,11 +143,11 @@ export class AuthService {
       await this.hash(tokens.refreshToken),
     );
 
-    return tokens;
+    return {...tokens, role: user.role,};
   }
 
   private async issueTokens(
-userId: number, username: string, image: string, phonenumber: string, role: AcessRole,
+    userId: number, username: string, image: string, phonenumber: string, role: AcessRole,
   ) {
     const payload = {
       sub: userId,

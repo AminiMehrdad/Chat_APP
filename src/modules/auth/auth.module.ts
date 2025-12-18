@@ -6,6 +6,7 @@ import { AcessRole } from '../users/Entitys/role.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Users } from '../users/Entitys/users.entity';
 import { UsersModule } from '../users/users.module';
+import { UserId } from 'src/common/commonServices/userIdfinder.service';
 
 @Module({
   imports: [
@@ -18,8 +19,8 @@ import { UsersModule } from '../users/users.module';
   ],
 
   controllers: [AuthController],
-  providers: [AuthService, JwtModule],
-  exports: [ JwtModule, AuthService],
+  providers: [AuthService, JwtModule, UserId],
+  exports: [ JwtModule, AuthService, UserId],
   // PasswordService,
 })
 export class AuthModule {}

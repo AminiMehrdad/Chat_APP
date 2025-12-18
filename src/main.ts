@@ -14,6 +14,7 @@ async function bootstrap() {
     origin: 'http://localhost:3000', // یا پورتی که React شما اجرا می‌شود
     credentials: true,
   });
+  app.useGlobalInterceptors(new LoggingInterceptor());
 
   const config = new DocumentBuilder()
     .setTitle('User Service API')
@@ -36,13 +37,13 @@ async function bootstrap() {
     }),
   );
 
+  
   app.useGlobalInterceptors(new TransformInterceptor());
   app.useGlobalFilters(new AllExceptionsFilter());
 
   // ------------------------------------------------------
 
   // request and response loggger:
-  app.useGlobalInterceptors(new LoggingInterceptor());
   // ------------------------------------------------------
 
   app.use(cookieParser());
