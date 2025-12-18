@@ -6,6 +6,7 @@ import "./styles/App.css"
 import { AuthProvider } from "./context/AuthProvider";
 import { ProtectedRoute } from "./routes/ProtectedRoute";
 import Admin from "./pages/Admin/Admin";
+import { ProtectedIslogin } from "./routes/ProtectedIslogin";
 
 
 const App = () => {
@@ -13,8 +14,10 @@ const App = () => {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignUp />} />
+          <Route element= {<ProtectedIslogin/>}>
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
+          </Route>
 
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<ChatPage />} />

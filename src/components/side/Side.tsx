@@ -3,19 +3,22 @@ import SearchBar from '../SearchBar/SearchBar';
 import SideUsers from '../SideUsers/SideUsers';
 import { ChatUser } from '../../types/chat';
 import './style.css';
+import { client } from '../../api/client';
 
 const Side: React.FC = () => {
   const [users, setUsers] = useState<ChatUser[]>([]);
 
   useEffect(() => {
-    fetch('/mock-data/data.json')
-      .then((res) => res.json())
-      .then((data: ChatUser[]) => {
-        setUsers(data);
-      })
-      .catch((err) => {
-        console.error('Failed to load users:', err);
-      });
+    const fetchUsers = async () => {
+      try {
+        const { data } = await client.get("/users/all");
+        setUsers(data.data);
+      } catch (error) {
+        console.error("Failed to load users:", error);
+      }
+    };
+
+    fetchUsers();
   }, []);
 
   return (

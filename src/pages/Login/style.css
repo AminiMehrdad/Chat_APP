@@ -129,3 +129,63 @@ button:hover {
   font-weight: bold;
   text-decoration: underline;
 }
+
+.input-error input {
+  border: 1.5px solid #ef4444;
+}
+
+.input-error label {
+  color: #ef4444;
+}
+
+/* SHAKE ANIMATION */
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  50% { transform: translateX(4px); }
+  75% { transform: translateX(-4px); }
+  100% { transform: translateX(0); }
+}
+
+.shake {
+  animation: shake 0.35s ease-in-out;
+}
+
+/* PASSWORD EYE */
+.password-wrapper {
+  position: relative;
+}
+
+.password-wrapper input {
+  width: 100%;
+  padding-right: 40px;
+}
+
+.eye-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #64748b;
+}
+
+.eye-btn:hover {
+  color: #0ea5e9;
+}
+
+.password-input {
+  background-color: var(--secondary);
+  padding-right: 44px;
+
+  background-image: url("data:image/svg+xml,%3Csvg ... %3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 18px;
+}
+
+.password-input:focus {
+  box-shadow: 4px 4px 0px var(--primary);
+}

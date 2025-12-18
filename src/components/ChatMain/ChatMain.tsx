@@ -1,13 +1,29 @@
-import { useEffect, useState } from "react";
+import {  useLayoutEffect, useState } from "react";
 import ChatHeadr from "../ChatHeader/ChatHeadr";
 import "./style.css";
 import Massages from "../Massages/Massages";
 import ChatFooter from "../ChatFooter/ChatFooter";
+import { client } from "../../api/client";
 
 const ChatMain = () => {
     const [messages, setMessages] = useState([]);
+    const [user, setUser] = useState({
+        id:"",
+        image:"",
+        username:"",
+        phonenumber:""
+    })
 
-    useEffect(() => {
+    useLayoutEffect(() => {
+        const fetchUserInfo = async () => {
+            try {
+                const {data} = await client.get("/users/Info");
+                setUser(data.data)
+            } catch (error) {
+                console.error("Failed to load user Info", error)
+            }
+        };
+        fetchUserInfo()
         fetch("/mock-data/massage.data.json")
             .then(res => res.json())
             .then(data => {
@@ -19,7 +35,7 @@ const ChatMain = () => {
     return (
         <main>
             <header>
-                <ChatHeadr />
+                <ChatHeadr image={user.image} username={user.username} phonenumber={user.phonenumber} />
             </header>
 
             <ul id="chat">

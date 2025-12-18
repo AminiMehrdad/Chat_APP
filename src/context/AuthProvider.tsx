@@ -6,6 +6,7 @@ import {
   useState,
 } from 'react';
 import { client } from '../api/client';
+import { bindAuthStore, setAccessToken } from '../api/authStoreBridge';
 
 type Role = 'user' | 'admin';
 
@@ -32,45 +33,56 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAuthenticated: false,
   });
 
-  // ✅ run ONCE when app starts
- useEffect(() => {
-  const controller = new AbortController();
+  /* ---------------------------
+     INITIAL REFRESH ON APP LOAD
+  ----------------------------*/
+  useEffect(() => {
+    const controller = new AbortController();
 
-  const initAuth = async () => {
-    try {
-      const { data } = await client.post(
-        '/auth/refresh',
-        {},
-        { signal: controller.signal }
-      );
-
-      setState({
-        accessToken: data.accessToken,
-        role: data.role,
-        isAuthenticated: true,
-        loading: false,
-      });
-    } catch (err: any) {
-        if (err.name === 'CanceledError') return;
+    const initAuth = async () => {
+      try {
+          const { data } = await client.post(
+          '/auth/refresh',
+          {},
+          { signal: controller.signal }
+        );
         
+        
+        const token = data.data.accessToken;
+        const role = data.data.role;
+
         setState({
-            accessToken: null,
-            role: null,
-            isAuthenticated: false,
-            loading: false,
+          accessToken: token,
+          role,
+          isAuthenticated: true,
+          loading: false,
         });
+
+        setAccessToken(token); // ✅ sync bridge
+      } catch (err: any) {
+        console.log(err.name);
         
-    }
-};
+        if (err.name === 'CanceledError') return;
 
-initAuth();
+        setState({
+          accessToken: null,
+          role: null,
+          isAuthenticated: false,
+          loading: false,
+        });
 
-  return () => {
-    controller.abort();
-  };
-}, []);
+        setAccessToken(null);
+      }
+    };
 
+    initAuth();
 
+    return () => controller.abort();
+  }, []);
+
+  /* ---------------------------
+     LOGIN
+  ----------------------------*/
   const login = useCallback((token: string, role: Role) => {
     setState({
       accessToken: token,
@@ -78,8 +90,13 @@ initAuth();
       isAuthenticated: true,
       loading: false,
     });
+
+    setAccessToken(token); // ✅ MUST
   }, []);
 
+  /* ---------------------------
+     LOGOUT
+  ----------------------------*/
   const logout = useCallback(() => {
     setState({
       accessToken: null,
@@ -87,29 +104,47 @@ initAuth();
       isAuthenticated: false,
       loading: false,
     });
+
+    setAccessToken(null); // ✅ MUST
   }, []);
 
-  const tryRefresh = useCallback(async () => {
+  /* ---------------------------
+     REFRESH (used by interceptor)
+  ----------------------------*/
+  const tryRefresh = useCallback(async (): Promise<boolean> => {
     try {
       const { data } = await client.post('/auth/refresh');
 
-      if (data?.accessToken && data?.role) {
-        setState({
-          accessToken: data.accessToken,
-          role: data.role,
-          isAuthenticated: true,
-          loading: false,
-        });
-        return true;
-      }
+      const token = data.data.accessToken;
+      const role = data.data.role;
 
-      logout();
-      return false;
+      if (!token) throw new Error('No token');
+
+      setState({
+        accessToken: token,
+        role,
+        isAuthenticated: true,
+        loading: false,
+      });
+
+      setAccessToken(token); // ✅ CRITICAL
+      return true;
     } catch {
       logout();
       return false;
     }
   }, [logout]);
+
+  /* ---------------------------
+     BIND AUTH → BRIDGE (REACTIVE)
+  ----------------------------*/
+  useEffect(() => {
+    bindAuthStore({
+      getAccessToken: () => state.accessToken,
+      tryRefresh,
+      logout,
+    });
+  }, [state.accessToken, tryRefresh, logout]);
 
   return (
     <AuthContext.Provider value={{ ...state, login, logout, tryRefresh }}>
