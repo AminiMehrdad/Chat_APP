@@ -12,6 +12,7 @@ import { AuthGuard } from './common/guards/auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { AcessRole } from './modules/users/Entitys/role.entity';
 import { Repository } from 'typeorm';
+import { ChatModule } from './modules/websocket-gateway/chat.module';
 
 @Module({
   imports: [
@@ -31,7 +32,8 @@ import { Repository } from 'typeorm';
       synchronize: true,
     }),
     UsersModule,
-    AuthModule
+    AuthModule,
+    ChatModule
   ],
   controllers: [AppController],
   providers: [
