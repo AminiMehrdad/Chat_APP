@@ -1,4 +1,12 @@
 export class AddMessageDto {
-    author: string;
-    body: string;
+    sender: string;
+    resiver: string;
+    date: number;
+    text: string;
+    user: {
+        username: string;
+        clock: string;
+        date: string;
+        message: string;
+    };
 }

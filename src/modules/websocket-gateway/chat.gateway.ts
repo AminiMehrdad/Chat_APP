@@ -1,29 +1,49 @@
-import { Logger } from "@nestjs/common";
-import { MessageBody, OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from "@nestjs/websockets";
+import {
+  ConnectedSocket,
+  MessageBody,
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer,
+} from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { AddMessageDto } from "src/common/dto/addMessage.dto";
+import { ChatService } from './chat.service';
 
-@WebSocketGateway({ cors: { origin: "*" } })
-export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
-    @WebSocketServer()
-    server: Server;
+@WebSocketGateway({
+  cors: { origin: '*' },
+})
+export class ChatGateway {
+  @WebSocketServer()
+  server: Server;
 
-    private logger = new Logger("ChatGateway");
+  constructor(private readonly chatService: ChatService) {}
 
-    @SubscribeMessage("sendMessage")
-    handleMessage(@MessageBody() payload: AddMessageDto ): AddMessageDto  {
-        this.logger.log(`Message received: ${payload.author} - ${payload.body}`);
-        this.server.emit('newMessage', payload);
-        return payload;
-    }
+  @SubscribeMessage('joinConversation')
+  async handleJoin(
+    @MessageBody() conversationId: number,
+    @ConnectedSocket() client: Socket,
+  ) {
+    client.join(`conversation-${conversationId}`);
+  }
 
-    // it will be handled when a client connects to the server
-    handleConnection(socket: Socket) {
-        this.logger.log(`Socket connected: ${socket.id}`);
-    }
+  @SubscribeMessage('sendMessage')
+  async handleMessage(
+    @MessageBody()
+    payload: {
+      conversationId: number;
+      senderId: number;
+      text: string;
+    },
+  ) {
+    const message = await this.chatService.sendMessage(
+      payload.conversationId,
+      payload.senderId,
+      payload.text,
+    );
 
-    // it will be handled when a client disconnects from the server
-    handleDisconnect(socket: Socket) {
-        this.logger.log(`Socket disconnected: ${socket.id}`);
-    }
+    this.server
+      .to(`conversation-${payload.conversationId}`)
+      .emit('newMessage', message);
+
+    return message;
+  }
 }
