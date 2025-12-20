@@ -1,4 +1,10 @@
-import { BadRequestException, forwardRef, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
@@ -17,7 +23,7 @@ export class AuthService {
     private readonly userId: UserId,
     @InjectRepository(AcessRole)
     private roleRepo: Repository<AcessRole>,
-  ) { }
+  ) {}
 
   async hash(data: string) {
     return argon2.hash(data, {
@@ -34,6 +40,7 @@ export class AuthService {
 
   async signup(dto: CreateUsersDto) {
     const existing = await this.usersService.findByUsername(dto.username);
+   
     const userPhonenumber = await this.usersService.findByPhonenumber(
       dto.phonenumber,
     );
@@ -50,11 +57,11 @@ export class AuthService {
       );
     }
 
-
     const passwordHash = await this.hash(dto.password);
-    const userImage = dto.gender == 'female' ? '/images/female.png' : '/images/male.png';
+    const userImage =
+      dto.gender == 'female' ? '/images/female.png' : '/images/male.png';
     const role = await this.roleRepo.findOne({
-      where: { name: "user" }
+      where: { name: 'user' },
     });
     if (!role) {
       throw new BadRequestException('Role not found');
@@ -64,7 +71,7 @@ export class AuthService {
       ...dto,
       password: passwordHash,
       image: userImage,
-      role: role
+      role: role,
     });
 
     const tokens = await this.issueTokens(
@@ -80,7 +87,7 @@ export class AuthService {
       await this.hash(tokens.refreshToken),
     );
 
-    return {...tokens, role: user.role};
+    return { ...tokens, role: user.role };
   }
 
   async login(dto: { phonenumber: string; password: string }) {
@@ -103,20 +110,18 @@ export class AuthService {
       user.role,
     );
 
-
     await this.usersService.updateRefreshToken(
       user.id,
       await this.hash(tokens.refreshToken),
     );
 
-    return {...tokens, role: user.role};
+    return { ...tokens, role: user.role };
   }
 
-  async refresh(refreshToken: string) {   
-    if (!refreshToken) {      
+  async refresh(refreshToken: string) {
+    if (!refreshToken) {
       throw new UnauthorizedException('Access denied');
     }
-
 
     const id = await this.userId.findUserId(refreshToken);
 
@@ -143,26 +148,28 @@ export class AuthService {
       await this.hash(tokens.refreshToken),
     );
 
-    return {...tokens, role: user.role,};
+    return { ...tokens, role: user.role };
   }
 
   private async issueTokens(
-    userId: number, username: string, image: string, phonenumber: string, role: AcessRole,
+    userId: number,
+    username: string,
+    image: string,
+    phonenumber: string,
+    role: AcessRole,
   ) {
     const payload = {
       sub: userId,
       username,
       image,
       phonenumber,
-      role
+      role,
     };
-
 
     const accessToken = await this.jwtService.signAsync(payload, {
       secret: process.env.JWT_ACCESS_SECRET,
       expiresIn: '30m',
     });
-
 
     const refreshToken = await this.jwtService.signAsync(payload, {
       secret: process.env.JWT_ACCESS_SECRET,

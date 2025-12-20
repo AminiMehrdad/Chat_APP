@@ -22,7 +22,6 @@ export class UsersService {
   ) {}
 
   async create(dto: CreateUsersDto) {
-    
     const user = this.usersRepo.create(dto);
 
     try {
@@ -47,32 +46,29 @@ export class UsersService {
     }
   }
 
-  async foundUsers(id:number) {
-     return this.usersRepo.find({
+  async foundUsers(id: number) {
+    return this.usersRepo.find({
       where: {
-        id: Not(id)
+        id: Not(id),
       },
       select: {
         id: true,
         username: true,
-        image: true
+        image: true,
       },
     });
   }
 
-  
   findAll() {
     return this.usersRepo.find();
   }
 
   async findOne(id: number) {
-
     if (typeof id !== 'number') {
-    throw new BadRequestException('Invalid userId');
-  }
+      throw new BadRequestException('Invalid userId');
+    }
     const user = await this.usersRepo.findOneBy({ id });
-    
-      
+
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
     }
@@ -81,13 +77,10 @@ export class UsersService {
   }
 
   async findByUsername(username: string) {
-    
     const user = await this.usersRepo.findOne({ where: { username } });
-    
+    console.log(user);
 
-    if (!user) {
-      throw new NotFoundException(`User with username ${username} not found`);
-    }
+    
 
     return user;
   }

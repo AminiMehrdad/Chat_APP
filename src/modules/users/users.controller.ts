@@ -9,6 +9,7 @@ import {
   ParseIntPipe,
   Req,
   Headers,
+  NotFoundException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApiTags, ApiResponse, ApiBody } from '@nestjs/swagger';
@@ -18,7 +19,7 @@ import { Role, Users } from './Entitys/users.entity';
 import { UpdateUsersDto } from '../../common/dto/update-users.dto';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Public } from '../auth/decorators/public.decorator';
-import type {Request} from 'express';
+import type { Request } from 'express';
 
 @ApiTags('users')
 @Controller('users')
@@ -32,32 +33,38 @@ export class UserController {
     status: 201,
     description: 'User created successfully',
     type: Users,
-  })  
+  })
   create(@Body() body: CreateUsersDto) {
     return this.userService.create(body);
   }
 
-  @Get("all")
+  @Get('all')
   @ApiResponse({
-    status:200,
-    description: "List of All User Name and status",
-    type: [Users]
+    status: 200,
+    description: 'List of All User Name and status',
+    type: [Users],
   })
-  findUsers(@Req() req: Request,
-   @Headers('authorization') authHeader: string
-) { 
-    const id = req["user"].sub
+  findUsers(@Req() req: Request, @Headers('authorization') authHeader: string) {
+    const id = req['user'].sub;
     return this.userService.foundUsers(id);
   }
-  
-  @Get("Info")
+
+  @Get('Info')
   @ApiResponse({ status: 200, description: 'Single user', type: Users })
   async Info(@Req() req: Request) {
-    const username = req["user"].username;
-    const user =  await this.userService.findByUsername(username);
-    return {id:user.id, username:user.username, image: user.image, phonenumber:user.phonenumber}
+    const username = req['user'].username;
+    const user = await this.userService.findByUsername(username);
+    if (!user) {
+      throw new NotFoundException(`User with username ${username} not found`);
+    }
+    return {
+      id: user.id,
+      username: user.username,
+      image: user.image,
+      phonenumber: user.phonenumber,
+    };
   }
-  @Get()  
+  @Get()
   @Roles(Role.Admin)
   @ApiResponse({ status: 200, description: 'List of all users', type: [Users] })
   findAll() {
@@ -69,7 +76,6 @@ export class UserController {
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.userService.findOne(id);
   }
-
 
   @Put(':id')
   @Roles(Role.Admin)

@@ -54,7 +54,6 @@ export class ChatService {
     }
 
     async getOrCreatePrivateConversation(userA: number, userB: number) {
-        // پیدا کردن conversation خصوصی موجود
         const existing = await this.conversationRepo
             .createQueryBuilder('c')
             .innerJoin('c.participants', 'p1', 'p1.userId = :u1', { u1: userA })

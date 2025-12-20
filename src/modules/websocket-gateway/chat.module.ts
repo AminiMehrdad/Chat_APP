@@ -8,6 +8,8 @@ import { ConversationParticipant } from './entities/conversation-participant.ent
 import { Messages } from './entities/messages.entity';
 import { UsersModule } from '../users/users.module';
 import { Users } from '../users/Entitys/users.entity';
+import { UserId } from 'src/common/commonServices/userIdfinder.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -15,10 +17,10 @@ import { Users } from '../users/Entitys/users.entity';
       Conversation,
       ConversationParticipant,
       Messages,
-      Users
+      Users,
     ]),
   ],
-  providers: [ChatGateway, ChatService],
+  providers: [ChatGateway, ChatService, UserId, JwtService],
   controllers: [ChatController],
 })
 export class ChatModule {}

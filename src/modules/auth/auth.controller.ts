@@ -1,4 +1,15 @@
-import { Controller, Post, Body, Res, HttpCode, UseGuards, Get, Req, Headers, UnauthorizedException } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Res,
+  HttpCode,
+  UseGuards,
+  Get,
+  Req,
+  Headers,
+  UnauthorizedException,
+} from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { AuthGuard } from 'src/common/guards/auth.guard';
@@ -11,8 +22,12 @@ export class AuthController {
 
   @Public()
   @Post('signup')
-  async signup(@Body() dto: CreateUsersDto, @Res({ passthrough: true }) res: Response) {
-    const { accessToken, refreshToken, role } = await this.authService.signup(dto);
+  async signup(
+    @Body() dto: CreateUsersDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { accessToken, refreshToken, role } =
+      await this.authService.signup(dto);
 
     res.cookie('refresh_token', refreshToken, {
       httpOnly: true,
@@ -21,16 +36,16 @@ export class AuthController {
       path: '/auth/refresh',
     });
 
-    return { accessToken, role:role.name };
+    return { accessToken, role: role.name };
   }
 
   @Public()
   @HttpCode(200)
   @Post('login')
   async login(@Body() dto: any, @Res({ passthrough: true }) res: Response) {
-    const { accessToken, refreshToken, role } = await this.authService.login(dto);
-    
-    
+    const { accessToken, refreshToken, role } =
+      await this.authService.login(dto);
+
     res.cookie('refresh_token', refreshToken, {
       httpOnly: true,
       secure: true,
@@ -38,20 +53,23 @@ export class AuthController {
       path: '/auth/refresh',
     });
 
-    return { accessToken, role:role.name };
+    return { accessToken, role: role.name };
   }
 
   @Public()
   @Post('refresh')
   async refresh(
-    @Res({ passthrough: true }) res: Response, 
+    @Res({ passthrough: true }) res: Response,
     @Req() req: Request,
     @Body('refreshToken') refreshToken?: string,
-  ) { 
-
+  ) {
     const token = refreshToken ?? req.cookies?.['refresh_token'];
-    
-    const { accessToken, refreshToken: newRt, role } = await this.authService.refresh(token);
+
+    const {
+      accessToken,
+      refreshToken: newRt,
+      role,
+    } = await this.authService.refresh(token);
 
     res.cookie('refresh_token', newRt, {
       httpOnly: true,
@@ -60,13 +78,11 @@ export class AuthController {
       path: '/auth/refresh',
     });
 
-    
-    
     return { accessToken, role: role.name };
   }
 
-  @Get("profile")
+  @Get('profile')
   getProfile(@Req() req) {
-    return req.user
+    return req.user;
   }
 }
