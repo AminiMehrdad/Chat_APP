@@ -46,7 +46,9 @@ const SignUp = () => {
   /* =======================
      Input Change Handler
   ======================= */
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     setHasError(false);
     setShake(false);
     setError(null);
@@ -72,6 +74,8 @@ const SignUp = () => {
       setAccessToken(data.data.accessToken);
       navigate("/chat", { replace: true });
     } catch (err: any) {
+      console.log(err);
+
       setError(err.response?.data?.message ?? "Signup failed");
       setHasError(true);
     }

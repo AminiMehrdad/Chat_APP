@@ -8,71 +8,65 @@ import { socket } from "../../api/socket";
 import { useUser } from "../../context/UserProvider";
 
 interface Message {
-    sender: string;
-    resiver: string;
-    date: number;
-    text: string;
-    user: {
-        username: string;
-        clock: string;
-        date: string;
-        massage: string;
-    }
+  sender: string;
+  resiver: string;
+  date: number;
+  text: string;
+  user: {
+    username: string;
+    clock: string;
+    date: string;
+    massage: string;
+  };
 }
- 
-
 
 const ChatMain = () => {
-    const {user, users, resiver, setResiver} = useUser()
-    console.log(resiver);
-    
-    const [messages, setMessages] = useState<Message[]>([]);
-    const [text, setText] = useState('');
+  const {
+    user,
+    users,
+    resiver,
+    conversationId,
+    setResiver,
+    messages,
+    setMessages,
+  } = useUser();
+  const [text, setText] = useState("");
 
-
-
-    useEffect(() => {
-        socket.on("newMessage", (massage) => {
-            setMessages((prev) => [...prev, massage]);
-        });
-        return () => {
-            socket.off("newMessage");
-        }
-    }, []);
-
-    const sendMessage = () => {
-        socket.emit('sendMessage', { 
-            sender: user.username,
-            resiver: resiver.username,
-            date:  Date.now(),
-            text,
-            user: {
-                username: user.username,
-                clock: new Date().toLocaleTimeString(),
-                date: new Date().toLocaleDateString(),
-                massage: text
-            }
-             });
-        setText('');
+  useEffect(() => {
+    socket.on("newMessage", (massage) => {
+      setMessages((prev) => [...prev, massage]);
+    });
+    return () => {
+      socket.off("newMessage");
     };
+  }, []);
 
-    return (
-        <main>
-            <header>
-                <ChatHeadr/>
-            </header>
+  const sendMessage = () => {
+    socket.emit("sendMessage", {
+      conversationId,
+      senderId: user.id,
+      text,
+    });
+    setText("");
+  };
 
-            <ul id="chat">
-                {messages.map((msg, index) =>
-                    <Massages messages={msg} key={index} />
-                )}
-            </ul>
+  return (
+    <main>
+      <header>
+        <ChatHeadr />
+      </header>
 
-            <footer>
-                <ChatFooter text={text} setText={setText} onSend={sendMessage}/>
-            </footer>
-        </main>
-    );
+      <ul id="chat">
+        {messages.map((msg, index) => (
+          <Massages messages={msg} key={index} />
+        ))}
+      </ul>
+
+      <footer>
+        <ChatFooter text={text} setText={setText} onSend={sendMessage} />
+      </footer>
+    </main>
+  );
 };
 
 export default ChatMain;

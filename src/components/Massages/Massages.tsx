@@ -3,13 +3,8 @@ import './style.css';
 
 interface ChatMessage {
   text:string;
-  sender: string;
-  user: {
-    username: string;
-    clock: string;
-    date: string;
-    massage: string; // اگر در سرور واقعاً همین فیلد است؛ در غیر این صورت به message تغییر دهید
-  }
+  senderId: number;
+  conversationId: number
 }
 
 interface MassagesProps {
@@ -18,7 +13,7 @@ interface MassagesProps {
 
 const Massages: React.FC<MassagesProps> = ({ messages }) => {
   const {user} = useUser()
-  const isYou = messages.sender === user.username;
+  const isYou = messages.senderId === user.id;
 
   return (
     <li className={isYou ? 'me' : 'you'}>
