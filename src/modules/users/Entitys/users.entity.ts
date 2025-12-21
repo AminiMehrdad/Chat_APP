@@ -1,7 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  Unique,
+} from 'typeorm';
 import { AcessRole } from './role.entity';
+import { Messages } from 'src/modules/websocket-gateway/entities/messages.entity';
 
 export enum GenderEnum {
   male = 'male',
@@ -10,8 +18,8 @@ export enum GenderEnum {
 }
 
 export enum Role {
-  User = "user",
-  Admin = "admin",
+  User = 'user',
+  Admin = 'admin',
 }
 
 @Entity('users')
@@ -71,7 +79,10 @@ export class Users {
   @Column({ nullable: true })
   hashedRefreshToken: string;
 
-  @ManyToOne(() => AcessRole, role => role.users, { eager: true })
+  @ManyToOne(() => AcessRole, (role) => role.users, { eager: true })
   role: AcessRole;
-    static role: any;
+  static role: any;
+
+  @OneToMany(() => Messages, (m) => m.user)
+  messages: Messages[];
 }

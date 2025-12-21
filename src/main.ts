@@ -11,7 +11,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    origin: 'http://localhost:3000', 
+    origin: 'http://localhost:3000',
     credentials: true,
   });
   app.useGlobalInterceptors(new LoggingInterceptor());
@@ -37,7 +37,6 @@ async function bootstrap() {
     }),
   );
 
-  
   app.useGlobalInterceptors(new TransformInterceptor());
   app.useGlobalFilters(new AllExceptionsFilter());
 
@@ -48,7 +47,7 @@ async function bootstrap() {
 
   app.use(cookieParser());
 
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT ?? 3000, '127.0.0.1');
   console.log(`server is run on port ${process.env.PORT}`);
 }
 bootstrap();
