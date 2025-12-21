@@ -25,6 +25,20 @@ export class ChatGateway {
     client.join(`conversation-${conversationId}`);
   }
 
+  @SubscribeMessage('leaveConversation')
+  handleLeave(
+    @MessageBody() conversationId: number,
+    @ConnectedSocket() client: Socket,
+  ) {
+    const room = `conversation-${conversationId}`;
+    client.leave(room);
+
+    return {
+      event: 'leftConversation',
+      room,
+    };
+  }
+
   @SubscribeMessage('sendMessage')
   async handleMessage(
     @MessageBody()

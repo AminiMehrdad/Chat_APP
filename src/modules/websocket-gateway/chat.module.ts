@@ -10,6 +10,7 @@ import { UsersModule } from '../users/users.module';
 import { Users } from '../users/Entitys/users.entity';
 import { UserId } from 'src/common/commonServices/userIdfinder.service';
 import { JwtService } from '@nestjs/jwt';
+import { UsersService } from '../users/users.service';
 
 @Module({
   imports: [
@@ -20,7 +21,7 @@ import { JwtService } from '@nestjs/jwt';
       Users,
     ]),
   ],
-  providers: [ChatGateway, ChatService, UserId, JwtService],
+  providers: [ChatGateway, ChatService, UserId, JwtService, UsersService],
   controllers: [ChatController],
 })
 export class ChatModule {}

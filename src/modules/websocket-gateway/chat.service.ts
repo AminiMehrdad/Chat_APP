@@ -61,6 +61,8 @@ export class ChatService {
             .where('c.type = :type', { type: ConversationType.PRIVATE })
             .getOne();
 
+        console.log(existing);
+        
         if (existing) return existing;
 
         // ساخت conversation جدید

@@ -1,12 +1,14 @@
 import { Body, Controller, Get, Param, Post, Headers } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { UserId } from 'src/common/commonServices/userIdfinder.service';
+import { UsersService } from '../users/users.service';
 
 @Controller('chat')
 export class ChatController {
   constructor(
     private readonly chatService: ChatService,
     private readonly userId: UserId,
+    private readonly userService: UsersService,
   ) {}
 
   @Get(':conversationId/messages')
@@ -31,7 +33,11 @@ export class ChatController {
     const messages = await this.chatService.getConversationMessages(
       conversation.id,
     );
+    const user = await this.userService.findOne(id);
+    console.log(user);
+    
     return {
+      username: user.username,
       conversationId: conversation.id,
       messages,
     };
