@@ -1,10 +1,10 @@
-import { useUser } from '../../context/UserProvider';
-import './style.css';
+import { useUser } from "../../context/UserProvider";
+import "./style.css";
 
 interface ChatMessage {
-  text:string;
+  text: string;
   senderId: number;
-  conversationId: number
+  conversationId: number;
 }
 
 interface MassagesProps {
@@ -12,19 +12,20 @@ interface MassagesProps {
 }
 
 const Massages: React.FC<MassagesProps> = ({ messages }) => {
-  const {user} = useUser()
+  const { user } = useUser();
   const isYou = messages.senderId === user.id;
 
   return (
-    <li className={isYou ? 'me' : 'you'}>
-      <div className="entete">
-        <span className={`status ${isYou ? 'blue' : 'green'}`} />
-        <h2>{messages.user.username}</h2>
-        <h3>{`${messages.user.clock}, ${messages.user.date}`}</h3>
-      </div>
-      <div className="triangle" />
-      <div className="message">{messages.text}</div>
-    </li>
+    <div></div>
+    // <li className={isYou ? 'me' : 'you'}>
+    //   <div className="entete">
+    //     <span className={`status ${isYou ? 'blue' : 'green'}`} />
+    //     <h2>{messages.user.username}</h2>
+    //     <h3>{`${messages.user.clock}, ${messages.user.date}`}</h3>
+    //   </div>
+    //   <div className="triangle" />
+    //   <div className="message">{messages.text}</div>
+    // </li>
   );
 };
 

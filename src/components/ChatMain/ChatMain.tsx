@@ -57,9 +57,10 @@ const ChatMain = () => {
       </header>
 
       <ul id="chat">
-        {messages.map((msg, index) => (
+        {/* {messages.map((msg, index) => (
+          console.log(msg)
           <Massages messages={msg} key={index} />
-        ))}
+        ))} */}
       </ul>
 
       <footer>

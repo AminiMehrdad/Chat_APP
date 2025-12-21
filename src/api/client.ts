@@ -1,74 +1,12 @@
-// import axios from "axios";
-// import { getAccessToken, tryRefresh, logout } from "./authStoreBridge";
-
-// export const client = axios.create({
-//     baseURL: 'http://localhost:3001',
-//     withCredentials: true,
-//     headers: {
-//         'Content-Type': 'application/json'
-//     }
-// });
-
-// client.interceptors.request.use((config) => {
-//     const token = getAccessToken();   
-//     if (token) {
-//         config.headers.Authorization = `Bearer ${token}`;
-//     }
-//     return config;
-// });
-
-// let refreshingPromise: Promise<boolean> | null = null;
-
-// client.interceptors.response.use(
-//   res => res,   
-//   async error => {
-//     const originalRequest = error.config;
-
-//     if (
-//       error.response?.status === 401 &&
-//       !originalRequest._retry 
-//     ) {
-//       originalRequest._retry = true;
-
-//       if (!refreshingPromise) {
-//         refreshingPromise = tryRefresh().finally(() => {
-//           refreshingPromise = null;
-//         });
-//       }
-
-//       const success = await refreshingPromise;
-
-//       if (success) {
-//         const token = getAccessToken();
-
-//         if (token) {
-//           originalRequest.headers.Authorization =
-//             `Bearer ${token}`;
-//         }
-
-//         return client(originalRequest);
-//       }
-
-//       logout();
-//     }
-
-//     return Promise.reject(error);
-//   }
-// );
-
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
-import {
-  getAccessToken,
-  tryRefresh,
-  logout,
-} from "./authStoreBridge";
+import { getAccessToken, tryRefresh, logout } from "./authStoreBridge";
 
 /* =========================================
    Main API Client (protected endpoints)
 ========================================= */
 
 export const client = axios.create({
-  baseURL: "http://localhost:3001",
+  baseURL: `http://localhost:${process.env.REACT_APP_SERVERPORT}`,
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
@@ -79,27 +17,20 @@ export const client = axios.create({
    Request Interceptor
 ========================================= */
 
-client.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    const token = getAccessToken();    
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-
-    return config;
+client.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+  const token = getAccessToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
-);
+
+  return config;
+});
 
 /* =========================================
    Refresh Control (Single Flight Lock)
 ========================================= */
 
 let refreshingPromise: Promise<boolean> | null = null;
-
-/**
- * اگر یک بار refresh شکست قطعی بخورد
- * دیگر در این session تلاش مجدد نمی‌کنیم
- */
 let refreshPermanentlyFailed = false;
 
 /* =========================================
@@ -180,8 +111,7 @@ client.interceptors.response.use(
     const newAccessToken = getAccessToken();
 
     if (newAccessToken) {
-      originalRequest.headers.Authorization =
-        `Bearer ${newAccessToken}`;
+      originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
     }
 
     return client(originalRequest);
