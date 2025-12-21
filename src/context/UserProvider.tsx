@@ -21,8 +21,13 @@ type Receiver = {
 };
 
 type Message = {
-  senderId?: number;
-  message?: string;
+  username: string;
+  conversationId: number;
+  message: string;
+  senderId: number;
+  clock: string;
+  date: string; 
+  text: string;
 };
 
 // ---- Context type ----

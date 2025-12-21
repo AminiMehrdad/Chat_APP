@@ -7,18 +7,6 @@ import { client } from "../../api/client";
 import { socket } from "../../api/socket";
 import { useUser } from "../../context/UserProvider";
 
-interface Message {
-  sender: string;
-  resiver: string;
-  date: number;
-  text: string;
-  user: {
-    username: string;
-    clock: string;
-    date: string;
-    massage: string;
-  };
-}
 
 const ChatMain = () => {
   const {
@@ -32,6 +20,8 @@ const ChatMain = () => {
   } = useUser();
   const [text, setText] = useState("");
 
+  console.log(conversationId);
+  
   useEffect(() => {
     socket.on("newMessage", (massage) => {
       setMessages((prev) => [...prev, massage]);
@@ -40,6 +30,16 @@ const ChatMain = () => {
       socket.off("newMessage");
     };
   }, []);
+
+  useEffect(() => {
+  if (!conversationId) return;
+
+  socket.emit("joinConversation", conversationId);
+
+  return () => {
+    socket.emit("leaveConversation", conversationId); 
+  };
+}, [conversationId]);
 
   const sendMessage = () => {
     socket.emit("sendMessage", {
@@ -50,6 +50,9 @@ const ChatMain = () => {
     setText("");
   };
 
+  console.log(messages);
+  
+
   return (
     <main>
       <header>
@@ -57,10 +60,9 @@ const ChatMain = () => {
       </header>
 
       <ul id="chat">
-        {/* {messages.map((msg, index) => (
-          console.log(msg)
+        {messages.map((msg, index) => (
           <Massages messages={msg} key={index} />
-        ))} */}
+        ))}
       </ul>
 
       <footer>

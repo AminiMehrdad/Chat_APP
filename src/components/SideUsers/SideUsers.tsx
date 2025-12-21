@@ -19,9 +19,9 @@ const SideUsers: React.FC<SideUsersProps> = ({ user }) => {
       const response = await client.post("/chat/getconversation", {
         userId: id,
         username,
-      });
-      setMessages(response.data.messages);
-      setConversationId(response.data.conversationId);
+      });  
+      setMessages(response.data.data.messages);
+      setConversationId(response.data.data.conversationId);
     } catch (error) {
       console.error("failed to load conversation", error);
     }
