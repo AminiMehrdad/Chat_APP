@@ -6,14 +6,31 @@ import { ValidationPipe } from '@nestjs/common';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.enableCors({
-    origin: 'http://localhost:3000',
-    credentials: true,
-  });
+  const allowedOrigins = ['http://localhost:3000'];
+
+  app.use(
+    cors({
+      origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error('CORS denied'));
+        }
+      },
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization'],
+    }),
+  );
+
+  // بسیار مهم
+  // app.options("*", cors());
+
   app.useGlobalInterceptors(new LoggingInterceptor());
 
   const config = new DocumentBuilder()
